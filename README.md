@@ -4,5 +4,5 @@
 
 제공 받은 워너크라이 파일은 두 개의 exe 파일로 이루어져 있다.
 
-1. [mssecsvc.exe](messevsvc.exe) : 초기 실행 로직이다. 악성 동작을 수행하기 전, 특정 도메인의 활성화 여부를 확인하는 킬 스위치 역할을 한다.
+1. [mssecsvc.exe](analysisWC/mssecsvc.exe.md) : 초기 실행 로직이다. 악성 동작을 수행하기 전, 특정 도메인의 활성화 여부를 확인하는 킬 스위치 역할을 한다.
 2. [./tasksche.exe](tasksche.exe) : 랜섬웨어 메인 서비스 파일이다.
