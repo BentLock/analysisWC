@@ -4,9 +4,25 @@
 - 작성일: 2026년 1월 30일 
 - 주요 특징: 킬 스위치, 서비스 등록, SMB 취약점(MS17-010) 이용 자가 전파
 
-## 0. 다이어그램
-<img width="1920" height="2744" alt="Image" src="https://github.com/user-attachments/assets/8339b562-ff73-4cd9-a149-3b9cb736968e" />
-
+## 0. 동작 흐름
+```mermaid
+graph TD
+    Start([실행: WinMain]) --> KillSwitch{킬 스위치 체크:<br/>가짜 도메인 접속?}
+    
+    KillSwitch -- "성공 (도메인 존재)" --> Exit([프로그램 종료])
+    KillSwitch -- "실패 (도메인 미등록)" --> MainLogic[sub_408090:<br/>메인 로직 진입]
+    
+    MainLogic --> ArgCheck{실행 인자<br/>존재 여부?}
+    
+    ArgCheck -- "인자 없음 (최초 실행)" --> InitialInfection[sub_407F20:<br/>초기 감염 루틴]
+    ArgCheck -- "인자 있음 (-m security)" --> ServiceRun[sub_408000:<br/>서비스 실행 루틴]
+    
+    subgraph "Dropper Routine (sub_407F20)"
+        InitialInfection --> InstallService[sub_407C40:<br/>자신을 서비스로 등록]
+        InitialInfection --> DropPayload[sub_407CE0:<br/>리소스에서 tasksche.exe 추출]
+        DropPayload --> RunRansomware[tasksche.exe 실행<br/>암호화 시작]
+    end
+```
 ## 1. 초기 실행 단계: 킬 스위치 (Kill Switch)
 
 가장 먼저 실행되는 WinMain은 프로그램의 실행 여부를 결정하는 결정적인 트리거를 포함합니다.
