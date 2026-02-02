@@ -3,7 +3,9 @@
 - 분석 대상: 워너크라이(WannaCry) 전파 및 드로퍼 모듈 (mssecsvc.exe 모체)
 - 작성일: 2026년 1월 30일 
 - 주요 특징: 킬 스위치, 서비스 등록, SMB 취약점(MS17-010) 이용 자가 전파
-![diagram1](../_Attachments/diagram1.png)
+
+## 0. 다이어그램
+<img width="3570" height="5102" alt="Image" src="https://github.com/user-attachments/assets/c74402fd-861a-41aa-8aef-421aeffd8645" />
 
 
 ## 1. 초기 실행 단계: 킬 스위치 (Kill Switch)
