@@ -5,8 +5,7 @@
 - 주요 특징: 킬 스위치, 서비스 등록, SMB 취약점(MS17-010) 이용 자가 전파
 
 ## 0. 다이어그램
-<img width="3570" height="5102" alt="Image" src="https://github.com/user-attachments/assets/c74402fd-861a-41aa-8aef-421aeffd8645" />
-
+<img width="1920" height="2744" alt="Image" src="https://github.com/user-attachments/assets/8339b562-ff73-4cd9-a149-3b9cb736968e" />
 
 ## 1. 초기 실행 단계: 킬 스위치 (Kill Switch)
 
