@@ -7,35 +7,59 @@
 ## 0. 동작 흐름
 ```mermaid
 graph TD
-    Start([실행: WinMain]) --> KillSwitch{킬 스위치 체크:<br/>가짜 도메인 접속?}
+    Start([1. 실행: WinMain]) --> KillSwitch{킬 스위치 체크:<br/>가짜 도메인 접속?}
     
     KillSwitch -- "성공 (도메인 존재)" --> Exit([프로그램 종료])
-    KillSwitch -- "실패 (도메인 미등록)" --> MainLogic[sub_408090:<br/>메인 로직 진입]
+    KillSwitch -- "실패 (도메인 미등록)" --> MainLogic[2. sub_408090:<br/>서비스 제어 및 분기기]
     
     MainLogic --> ArgCheck{실행 인자<br/>존재 여부?}
     
-    ArgCheck -- "인자 없음 (최초 실행)" --> InitialInfection[sub_407F20:<br/>초기 감염 루틴]
-    ArgCheck -- "인자 있음 (-m security)" --> ServiceRun[sub_408000:<br/>서비스 실행 루틴]
+    ArgCheck -- "인자 없음 (최초 실행)" --> InitialInfection[3-1. sub_407F20:<br/>초기 감염 루틴]
+    ArgCheck -- "인자 있음 (-m security)" --> ServiceRun[3-2. sub_408000:<br/>서비스 실행 루틴]
     
     subgraph "Dropper Routine (sub_407F20)"
-        InitialInfection --> InstallService[sub_407C40:<br/>자신을 서비스로 등록]
-        InitialInfection --> DropPayload[sub_407CE0:<br/>리소스에서 tasksche.exe 추출]
+        InitialInfection --> InstallService[4-1. sub_407C40:<br/>자신을 서비스로 등록]
+        InitialInfection --> DropPayload[4-2. sub_407CE0:<br/>리소스에서 tasksche.exe 추출]
         DropPayload --> RunRansomware[tasksche.exe 실행<br/>암호화 시작]
     end
 ```
+1. [WinMain](./PseudoCode/WinMain) : 킬 스위치 도메인이 **없으면** 실행
+
+2. [sub_408090](./PseudoCode/sub_408090) : 서비스를 등록하고 `sub_408000`을 실행
+
+3-1. [sub_407F20](./PseudoCode/sub_407F20) : 초기 감염 루틴
+
+3-2. [sub_408000](./PseudoCode/sub_408000) : 서비스 실행 루틴
+
+4-1. [sub_407C40](./PseudoCode/sub_407C40) : 자신을 서비스로 등록
+
+4-2. [sub_407CE0](./PseudoCode/sub_407CE0) : 리소스에서 tasksche.exe 추출
+
 ## 1. 초기 실행 단계: 킬 스위치 (Kill Switch)
+### 1.1. 킬 스위치 도메인 설정
+```c
+strcpy(szUrl, "http://www.iuqerfsodp9ifjaposdfjhgosurijfaewrwergwea.com");
+```
+공격자는 당시 등록되어 있지 않은 의미 없는 긴 문자열의 도메인을 코드에 하드코딩 해 두었다.
+### 1.2. 네트워크 연결 시도
+```c
+v4 = InternetOpenA(0, 1u, 0, 0, 0); 
+InternetOpenUrlA(v4, szUrl, 0, 0, 0x84000000, 0);
+```
++ `InternetOpenA` : 인터넷 연결을 초기화한다.
++ `InternetOpenUrlA` : 1.1에서 설정한 szURL에 대한 연결을 설정하고 요청을 보낸다.
+    + 이 함수는 도메인이 응답하면 핸들을 반환하고, 실패하면 `NULL`을 반환한다.
 
-가장 먼저 실행되는 WinMain은 프로그램의 실행 여부를 결정하는 결정적인 트리거를 포함합니다.
-
-    동작: 특정 도메인(www.iuqerfsodp9ifjaposdfjhgosurijfaewrwergwea.com)에 HTTP GET 요청을 보냅니다.
-
-    분기:
-
-        연결 성공 시: 즉시 종료. (공격 중단)
-
-        연결 실패 시: 본격적인 공격 루틴인 sub_408090 호출.
-
-    분석가 소견: 샌드박스 탐지 우회 또는 공격 확산 방지를 위한 장치로 보이며, 이 도메인이 등록되면서 전 세계적인 확산이 멈춘 역사적인 지점입니다.
+### 1.3. 실행 분기점
+의사코드에는 생략되어 있으나 어셈블리 코드를 확인하면 아래와 같다.
+```assembly
+call    ds:InternetOpenUrlA
+mov     edi, eax        ; InternetOpenUrlA의 결과를 edi에 저장
+push    esi             ; hInternet 핸들 정리
+mov     esi, ds:InternetCloseHandle
+test    edi, edi        ; 접속 결과가 성공(Not NULL)인지 확인
+jmp     short $+2       ; 다음 명령어 이동
+```
 
 ## 2. 지속성 확보 및 페이로드 추출 (Dropper)
 

@@ -1,0 +1,32 @@
+int sub_408090()
+{
+  SC_HANDLE v1; // eax
+  SC_HANDLE v2; // edi
+  SC_HANDLE v3; // eax
+  SC_HANDLE v4; // esi
+  SERVICE_TABLE_ENTRYA ServiceStartTable; // [esp+0h] [ebp-10h] BYREF
+  int v6; // [esp+8h] [ebp-8h]
+  int v7; // [esp+Ch] [ebp-4h]
+
+  GetModuleFileNameA(0, FileName, 0x104u);
+  if ( *_p___argc() < 2 )
+    return sub_407F20();
+  v1 = OpenSCManagerA(0, 0, 0xF003Fu);
+  v2 = v1;
+  if ( v1 )
+  {
+    v3 = OpenServiceA(v1, ServiceName, 0xF01FFu);
+    v4 = v3;
+    if ( v3 )
+    {
+      sub_407FA0(v3, 60);
+      CloseServiceHandle(v4);
+    }
+    CloseServiceHandle(v2);
+  }
+  ServiceStartTable.lpServiceName = ServiceName;
+  ServiceStartTable.lpServiceProc = (LPSERVICE_MAIN_FUNCTIONA)sub_408000;
+  v6 = 0;
+  v7 = 0;
+  return StartServiceCtrlDispatcherA(&ServiceStartTable);
+}

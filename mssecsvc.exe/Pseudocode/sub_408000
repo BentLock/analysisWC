@@ -1,0 +1,25 @@
+SERVICE_STATUS_HANDLE __stdcall sub_408000(int a1, int a2)
+{
+  SERVICE_STATUS_HANDLE result; // eax
+
+  ServiceStatus.dwServiceType = 32;
+  ServiceStatus.dwCurrentState = 2;
+  ServiceStatus.dwControlsAccepted = 1;
+  ServiceStatus.dwWin32ExitCode = 0;
+  ServiceStatus.dwServiceSpecificExitCode = 0;
+  ServiceStatus.dwCheckPoint = 0;
+  ServiceStatus.dwWaitHint = 0;
+  result = RegisterServiceCtrlHandlerA(ServiceName, HandlerProc);
+  hServiceStatus = result;
+  if ( result )
+  {
+    ServiceStatus.dwCurrentState = 4;
+    ServiceStatus.dwCheckPoint = 0;
+    ServiceStatus.dwWaitHint = 0;
+    SetServiceStatus(result, &ServiceStatus);
+    sub_407BD0();
+    Sleep(0x5265C00u);
+    ExitProcess(1u);
+  }
+  return result;
+}

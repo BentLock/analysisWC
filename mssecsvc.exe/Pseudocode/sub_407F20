@@ -1,0 +1,6 @@
+int sub_407F20()
+{
+  sub_407C40();
+  sub_407CE0();
+  return 0;
+}

