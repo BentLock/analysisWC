@@ -96,11 +96,68 @@ jmp     short $+2       ; 다음 명령어 이동
     + 만약 기존 파일이 있다면 `MoveFileExA`를 이용해 이름을 `qeriuwjhrf`로 바꾸어 백업하거나 덮어쓴다.
 + 최종 실행 : `CreateProcessA`를 호출하여 추출한 `tasksche.exe`를 실행한다.
 
-## 4. 네트워크 전파 메커니즘 (Worm Engine)
+## 4. 네트워크 전파 메커니즘 [(sub_408000)](./Pseudocode/sub_408000)
+이 함수는 표준적인 Windows 서비스 메인 함수의 형태를 띠고 있다.
+```mermaid
+graph TD
+    ServiceStart[sub_408000:<br/>서비스 메인] --> WormEngine[sub_407BD0:<br/>전파 엔진 가동]
+    
+    subgraph "Scanning Phase"
+        WormEngine --> LANScan[sub_407720:<br/>로컬 네트워크 스캔]
+        WormEngine --> WANScan[sub_407840:<br/>공인 IP 랜덤 스캔]
+    end
+    
+    LANScan & WANScan --> PortCheck[sub_407480:<br/>TCP 445 포트 노킹]
+    
+    PortCheck -- "포트 열림" --> ExploitManager[StartAddress:<br/>공격 지휘]
+    
+    subgraph "Exploitation Phase (MS17-010)"
+        ExploitManager --> CheckBackdoor{sub_401980:<br/>DoublePulsar<br/>이미 존재?}
+        CheckBackdoor -- "No" --> EternalBlue[sub_401370:<br/>EternalBlue 취약점 공격]
+        EternalBlue --> InstallBackdoor[DoublePulsar 백도어 설치]
+        CheckBackdoor -- "Yes" --> InjectPayload[sub_4072A0:<br/>페이로드 인젝션]
+        InstallBackdoor --> InjectPayload
+    end
+    
+    InjectPayload --> InfectionSuccess([타겟 PC 감염 완료])
+```
 
-워너크라이가 '웜'으로서 무차별 확산되는 핵심 엔진입니다. 멀티스레딩을 극한으로 활용합니다.
-### 4.1 스캐닝 전략 (sub_407BD0)
+1. 서비스 상태 설정 : `ServiceStatus.dwCurrentState = 2;` (SERVICE_START_PENDING)로 시작하여 핸들러로 등록한 뒤 `4`(SERVICE_RUNNING)로 변경한다.
+2. 핵심 실행 루틴 호출 : 서비스가 실행중 상태(`4`)가 되자마자 [`sub_407BD0()`](#41-멀티스레드-전파-엔진-sub_407bd0)를 호출한다.
+3. 지연 및 종료 : `Sleep(0x5265C00u);` 약 24시간 동안 대기한 후 프로세스를 종료한다.
 
+### 4.1. 멀티스레드 전파 엔진 [(sub_407BD0)](./Pseudocode/sub_407BD0)
+
+#### 4.1.1 로컬 네트워크 스캐닝 [(sub_407720)](./Pseudocode/sub_407720)
+이 함수는 현재 감염된 PC와 같은 네트워크에 있는 다른 PC들을 찾아낸다.
+
++ 정보 수집 [(sub_409160)](./Pseudocode/sub_409160) : 감염됨 PC의 IP 주소와 서브넷 마스크 정보를 가져온다.
+
++ 스레드 조절
+```c
+ if ( *(int *)&FileName[268] > 10 )
+    {
+      do
+        Sleep(0x64u);
+      while ( *(int *)&FileName[268] > 10 );
+      v1 = (void **)v10;
+    }
+```
++ 공격 스레드 생성([`sub_4076B0`](./Pseudocode/sub_4076B0)) : 로컬 IP 리스트를 순회하며 `sub_4076B0` 함수를 실행한다. 이 함수가 445번 포트를 찌르며 SMB 취약점을 이용한다.
+
+#### 4.1.2 공인 IP 무작위 스캐닝 [(sub_407840)](./Pseudocode/sub_407840)
+이 함수는 무작위 IP 주소를 생성하여 공격 대상을 찾는다.
++ 랜덤 IP todtjd (`srand`,`sub_407660`): `GetTickCount`와 `Time` 등을 조합해 난수 시드를 만들고 무작위 IP 주소를 생성한다.
++ 필터링 : 루프 내에서 특정 대역은 피한다.
+    + `v6 == 127` : 루프백 주소 제외
+    + `v6 >= 224` : 멀티캐스트 및 예약된 IP 대역 제외.
++ 서브넷 응답 스레드 생성 : `sub_407480` 함수로 무작위로 하나의 IP를 찍어보고 응답이 있다면 해당 대역의 마지막 자리(1~254)를 전부 훑으며 공격 스레드를 생성한다.
+```c
+sprintf(Buffer, "%d.%d.%d.%d", v6, v16, v7, v10); // 마지막 옥텟(v10)을 1부터 254까지 증가
+```
+
+
+######################################################
     LAN 스캔 (sub_407720): 현재 감염된 PC가 속한 로컬 네트워크 대역을 꼼꼼하게 스캔합니다. (최대 10개 스레드)
 
     WAN 스캔 (sub_407840): 임의의 공인 IP 주소를 무작위로 생성하여 전 세계 인터넷을 대상으로 스캔합니다. (128개 스레드)

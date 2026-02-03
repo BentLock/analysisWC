@@ -1,0 +1,221 @@
+int __cdecl sub_409160(int a1, int a2)
+{
+  struct _IP_ADAPTER_INFO *v2; // eax
+  ULONG *v3; // esi
+  ULONG *v5; // edi
+  unsigned int v6; // eax
+  u_long v7; // ebx
+  u_long v8; // ebp
+  ULONG *v9; // edi
+  u_long v10; // eax
+  u_long v11; // esi
+  u_long v12; // eax
+  u_long v13; // eax
+  u_long v14; // eax
+  IP_PER_ADAPTER_INFO_W2KSP1 *v15; // esi
+  IP_ADDR_STRING *p_DnsServerList; // edi
+  u_long v17; // eax
+  u_long v18; // esi
+  u_long v19; // eax
+  u_long v20; // eax
+  u_long v21; // eax
+  unsigned int *v22; // ebx
+  int v23; // edi
+  unsigned int *v24; // esi
+  unsigned int v25; // edi
+  unsigned int v26; // ecx
+  unsigned int *v27; // eax
+  unsigned int *v28; // edx
+  int *v29; // edx
+  int *v30; // eax
+  int *v31; // ecx
+  int *v32; // edi
+  int *i; // eax
+  int *v34; // esi
+  int *j; // eax
+  int v36; // edx
+  unsigned int *v37; // [esp-14h] [ebp-2Ch]
+  u_long v38; // [esp-10h] [ebp-28h]
+  u_long v39; // [esp-10h] [ebp-28h]
+  ULONG SizePointer; // [esp+4h] [ebp-14h] BYREF
+  HLOCAL hMem; // [esp+8h] [ebp-10h]
+  ULONG *v42; // [esp+Ch] [ebp-Ch]
+  unsigned int v43; // [esp+10h] [ebp-8h] BYREF
+  IP_PER_ADAPTER_INFO_W2KSP1 *v44; // [esp+14h] [ebp-4h]
+
+  SizePointer = 0;
+  if ( GetAdaptersInfo(0, &SizePointer) != 111 )
+    return 0;
+  if ( !SizePointer )
+    return 0;
+  v2 = (struct _IP_ADAPTER_INFO *)LocalAlloc(0, SizePointer);
+  v3 = (ULONG *)v2;
+  hMem = v2;
+  if ( !v2 )
+    return 0;
+  if ( GetAdaptersInfo(v2, &SizePointer) )
+  {
+    LocalFree(v3);
+    return 0;
+  }
+  while ( 1 )
+  {
+    v5 = v3 + 107;
+    v42 = v3 + 107;
+    if ( v3 != (ULONG *)-428 )
+    {
+      while ( 1 )
+      {
+        v43 = inet_addr((const char *)v5 + 4);
+        v6 = inet_addr((const char *)v5 + 20);
+        if ( v43 != -1 && v43 && v6 != -1 && v6 )
+        {
+          v7 = v43 & v6;
+          v8 = v43 | ~v6;
+          sub_408E50(a1, v43 & v6, v8);
+          sub_409470(*(_DWORD *)(a2 + 8), 1, &v43);
+          v9 = v3 + 117;
+          if ( v3 != (ULONG *)-468 )
+          {
+            do
+            {
+              v10 = inet_addr((const char *)v9 + 4);
+              v11 = v10;
+              if ( v10 != -1 && v10 && !sub_4090D0(v10, v7, v8) )
+              {
+                v12 = htonl(v11);
+                LOBYTE(v12) = -1;
+                v38 = ntohl(v12);
+                v13 = htonl(v11);
+                LOBYTE(v13) = 0;
+                v14 = ntohl(v13);
+                sub_408E50(a1, v14, v38);
+              }
+              v9 = (ULONG *)*v9;
+            }
+            while ( v9 );
+            v3 = (ULONG *)hMem;
+          }
+          if ( GetPerAdapterInfo(v3[103], 0, &SizePointer) == 111 )
+          {
+            v15 = (IP_PER_ADAPTER_INFO_W2KSP1 *)LocalAlloc(0, SizePointer);
+            v44 = v15;
+            if ( v15 )
+            {
+              if ( GetPerAdapterInfo(*((_DWORD *)hMem + 103), v15, &SizePointer) )
+              {
+                p_DnsServerList = &v15->DnsServerList;
+                if ( v15 != (IP_PER_ADAPTER_INFO_W2KSP1 *)-12 )
+                {
+                  do
+                  {
+                    v17 = inet_addr(p_DnsServerList->IpAddress.String);
+                    v18 = v17;
+                    if ( v17 != -1 && v17 && sub_409110(v17) && !sub_4090D0(v18, v7, v8) )
+                    {
+                      v19 = htonl(v18);
+                      LOBYTE(v19) = -1;
+                      v39 = ntohl(v19);
+                      v20 = htonl(v18);
+                      LOBYTE(v20) = 0;
+                      v21 = ntohl(v20);
+                      sub_408E50(a1, v21, v39);
+                    }
+                    p_DnsServerList = p_DnsServerList->Next;
+                  }
+                  while ( p_DnsServerList );
+                  v15 = v44;
+                }
+              }
+            }
+            LocalFree(v15);
+            v3 = (ULONG *)hMem;
+          }
+          v5 = v42;
+        }
+        v42 = (ULONG *)*v5;
+        if ( !v42 )
+          break;
+        v5 = v42;
+      }
+    }
+    hMem = (HLOCAL)*v3;
+    if ( !hMem )
+      break;
+    v3 = (ULONG *)hMem;
+  }
+  v23 = *(_DWORD *)(a1 + 4);
+  v37 = *(unsigned int **)(a1 + 8);
+  v22 = v37;
+  if ( (int)(((unsigned int)v37 - v23) & 0xFFFFFFFC) > 64 )
+  {
+    sub_409680(v23, v37);
+    v24 = (unsigned int *)(v23 + 64);
+    sub_409750(v23, v23 + 64);
+    if ( (unsigned int *)(v23 + 64) != v22 )
+    {
+      do
+      {
+        v25 = *v24;
+        v26 = *(v24 - 1);
+        v27 = v24 - 1;
+        v28 = v24;
+        if ( *v24 < v26 )
+        {
+          do
+          {
+            *v28 = v26;
+            v26 = *(v27 - 1);
+            v28 = v27--;
+          }
+          while ( v25 < v26 );
+        }
+        ++v24;
+        *v28 = v25;
+      }
+      while ( v24 != v22 );
+    }
+  }
+  else
+  {
+    sub_409750(v23, v37);
+  }
+  v29 = *(int **)(a1 + 8);
+  v30 = *(int **)(a1 + 4);
+  v31 = v30;
+  if ( v30 != v29 )
+  {
+    while ( ++v30 != v29 )
+    {
+      if ( *v31 == *v30 )
+      {
+        if ( v31 != v29 )
+        {
+          v32 = v31++;
+          for ( i = v31; i != v29; ++i )
+          {
+            if ( *v32 != *i )
+            {
+              *v31 = *i;
+              v32 = i;
+              ++v31;
+            }
+          }
+        }
+        goto LABEL_54;
+      }
+      v31 = v30;
+    }
+  }
+  v31 = *(int **)(a1 + 8);
+LABEL_54:
+  v34 = *(int **)(a1 + 8);
+  for ( j = v29; j != v34; ++v31 )
+  {
+    v36 = *j++;
+    *v31 = v36;
+  }
+  *(_DWORD *)(a1 + 8) = v31;
+  LocalFree(hMem);
+  return 1;
+}

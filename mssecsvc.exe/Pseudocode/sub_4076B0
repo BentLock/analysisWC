@@ -1,0 +1,20 @@
+unsigned int __stdcall sub_4076B0(void *ArgList)
+{
+  void *v1; // eax
+  void *v2; // esi
+
+  if ( (int)sub_407480(ArgList) > 0 )
+  {
+    v1 = (void *)beginthreadex(0, 0, StartAddress, ArgList, 0, 0);
+    v2 = v1;
+    if ( v1 )
+    {
+      if ( WaitForSingleObject(v1, 0x927C0u) == 258 )
+        TerminateThread(v2, 0);
+      CloseHandle(v2);
+    }
+  }
+  InterlockedDecrement((volatile LONG *)&FileName[268]);
+  endthreadex(0);
+  return 0;
+}

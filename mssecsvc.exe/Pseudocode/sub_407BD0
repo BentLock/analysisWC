@@ -1,0 +1,24 @@
+int sub_407BD0()
+{
+  int result; // eax
+  void *v1; // eax
+  int i; // esi
+  void *v3; // eax
+
+  result = sub_407B90();
+  if ( result )
+  {
+    v1 = (void *)beginthreadex(0, 0, sub_407720, 0, 0, 0);
+    if ( v1 )
+      CloseHandle(v1);
+    for ( i = 0; i < 128; ++i )
+    {
+      v3 = (void *)beginthreadex(0, 0, sub_407840, (void *)i, 0, 0);
+      if ( v3 )
+        CloseHandle(v3);
+      Sleep(0x7D0u);
+    }
+    return 0;
+  }
+  return result;
+}

@@ -1,0 +1,9 @@
+int sub_407B90()
+{
+  WSAData WSAData; // [esp+0h] [ebp-190h] BYREF
+
+  if ( WSAStartup(0x202u, &WSAData) )
+    return 0;
+  sub_407620();
+  return sub_407A20();
+}

