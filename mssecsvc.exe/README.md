@@ -23,17 +23,17 @@ graph TD
         DropPayload --> RunRansomware[tasksche.exe 실행<br/>암호화 시작]
     end
 ```
-1. [WinMain](./PseudoCode/WinMain) : 킬 스위치 도메인이 **없으면** 실행
+1. [WinMain](./Pseudocode/WinMain) : 킬 스위치 도메인이 **없으면** 실행
 
-2. [sub_408090](./PseudoCode/sub_408090) : 서비스를 등록하고 `sub_408000`을 실행
+2. [sub_408090](./Pseudocode/sub_408090) : 서비스를 등록하고 `sub_408000`을 실행
 
-3-1. [sub_407F20](./PseudoCode/sub_407F20) : 초기 감염 루틴
+3-1. [sub_407F20](./Pseudocode/sub_407F20) : 초기 감염 루틴
 
-3-2. [sub_408000](./PseudoCode/sub_408000) : 서비스 실행 루틴
+3-2. [sub_408000](./Pseudocode/sub_408000) : 서비스 실행 루틴
 
-4-1. [sub_407C40](./PseudoCode/sub_407C40) : 자신을 서비스로 등록
+4-1. [sub_407C40](./Pseudocode/sub_407C40) : 자신을 서비스로 등록
 
-4-2. [sub_407CE0](./PseudoCode/sub_407CE0) : 리소스에서 tasksche.exe 추출
+4-2. [sub_407CE0](./Pseudocode/sub_407CE0) : 리소스에서 tasksche.exe 추출
 
 ## 1. 초기 실행 단계: 킬 스위치 (Kill Switch)
 ### 1.1. 킬 스위치 도메인 설정
