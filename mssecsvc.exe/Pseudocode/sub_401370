@@ -1,0 +1,116 @@
+void __cdecl sub_401370(char *cp, u_short hostshort)
+{
+  __int16 *v2; // esi
+  double v3; // st7
+  __int16 v4; // ax
+  SOCKET v5; // edi
+  int v6; // edi
+  char v7; // [esp+10h] [ebp-2F84h] BYREF
+  char v8; // [esp+11h] [ebp-2F83h]
+  char v9; // [esp+12h] [ebp-2F82h] BYREF
+  char v10; // [esp+13h] [ebp-2F81h]
+  __int64 TickCount; // [esp+14h] [ebp-2F80h] BYREF
+  _DWORD v12[2]; // [esp+1Ch] [ebp-2F78h] BYREF
+  _DWORD v13[2]; // [esp+24h] [ebp-2F70h] BYREF
+  double v14; // [esp+2Ch] [ebp-2F68h]
+  _DWORD v15[2]; // [esp+34h] [ebp-2F60h] BYREF
+  _DWORD v16[2]; // [esp+3Ch] [ebp-2F58h] BYREF
+  __int64 v17; // [esp+44h] [ebp-2F50h]
+  int v18; // [esp+4Ch] [ebp-2F48h] BYREF
+  int v19; // [esp+54h] [ebp-2F40h] BYREF
+  double v20; // [esp+5Ch] [ebp-2F38h]
+  struct sockaddr name; // [esp+64h] [ebp-2F30h] BYREF
+  int v22; // [esp+74h] [ebp-2F20h] BYREF
+  int v23; // [esp+7Ch] [ebp-2F18h] BYREF
+  char v24[2048]; // [esp+84h] [ebp-2F10h] BYREF
+  char buf[10000]; // [esp+884h] [ebp-2710h] BYREF
+
+  v7 = 0;
+  v8 = 8;
+  v9 = 0;
+  v10 = 8;
+  TickCount = GetTickCount();
+  v14 = (double)TickCount;
+  sub_401D80();
+  sub_4082C0(&TickCount, *(_DWORD *)dword_43146C, dword_43146C);
+  v2 = &word_431480;
+  while ( 1 )
+  {
+    v20 = *((double *)v2 + 1252) * 1000.0;
+    TickCount = GetTickCount();
+    v3 = v20 - ((double)TickCount - v14);
+    if ( v3 > 0.0 )
+      sub_401660((LARGE_INTEGER)(__int64)(v3 * 1000.0));
+    v17 = GetTickCount();
+    v4 = *v2;
+    v14 = (double)v17;
+    if ( v4 == 2 )
+      break;
+    if ( v4 == 3 )
+    {
+      v13[0] = *((_DWORD *)v2 + 1);
+      v13[1] = 0;
+      sub_408390(&v23, v13);
+      closesocket(*(_DWORD *)(v23 + 16));
+    }
+    else if ( v4 )
+    {
+      if ( v4 == 1 )
+      {
+        v12[0] = *((_DWORD *)v2 + 1);
+        v12[1] = 0;
+        sub_408390(&v19, v12);
+        if ( recv(*(_DWORD *)(v19 + 16), v24, 2048, 0) == -1 )
+          goto LABEL_24;
+        if ( *((int *)v2 + 2) > 3 )
+        {
+          if ( !stricmp((const char *)v2 + 12, String2) )
+          {
+            v9 = v24[28];
+            v10 = v24[29];
+          }
+          if ( !stricmp((const char *)v2 + 12, aUserid) )
+          {
+            v7 = v24[32];
+            v8 = v24[33];
+          }
+        }
+      }
+    }
+    else
+    {
+      memset(buf, 0, sizeof(buf));
+      v6 = sub_401190(v2 + 6, *((_DWORD *)v2 + 2), buf, &v7, &v9);
+      v15[0] = *((_DWORD *)v2 + 1);
+      v15[1] = 0;
+      sub_408390(&v22, v15);
+      if ( send(*(_DWORD *)(v22 + 16), buf, v6, 0) == -1 )
+        goto LABEL_24;
+    }
+LABEL_20:
+    v2 += 5012;
+    if ( (int)v2 >= (int)word_5FFD08 )
+      return;
+  }
+  name.sa_family = 2;
+  *(_DWORD *)&name.sa_data[2] = inet_addr(cp);
+  *(_WORD *)name.sa_data = htons(hostshort);
+  v5 = socket(2, 1, 0);
+  if ( v5 == -1 )
+  {
+    sub_401310();
+    return;
+  }
+  if ( connect(v5, &name, 16) != -1 )
+  {
+    v16[0] = *((_DWORD *)v2 + 1);
+    v16[1] = 0;
+    sub_408390(&v18, v16);
+    *(_DWORD *)(v18 + 16) = v5;
+    goto LABEL_20;
+  }
+  closesocket(v5);
+LABEL_24:
+  sub_401310();
+  Sleep(0x3E8u);
+}
