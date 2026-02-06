@@ -49,6 +49,7 @@ graph TD
 strcpy(szUrl, "http://www.iuqerfsodp9ifjaposdfjhgosurijfaewrwergwea.com");
 ```
 공격자는 당시 등록되어 있지 않은 의미 없는 긴 문자열의 도메인을 코드에 하드코딩 해 두었다.
+보안 분석 환경(Sandbox)은 가짜 인터넷 연결을 제공하여 모든 도메인 접속을 성공으로 처리하는 경우가 많다. 이를 이용해 분석 환경임을 감지하면 실행되지 않도록 설계한 것으로 추측된다.
 ### 2.2. 네트워크 연결 시도
 ```c
 v4 = InternetOpenA(0, 1u, 0, 0, 0); 
