@@ -1,0 +1,59 @@
+int __cdecl sub_4072A0(char *cp, int a2, u_short hostshort)
+{
+  SOCKET v3; // eax
+  SOCKET v4; // esi
+  char v5; // bl
+  int v6; // edi
+  int v7; // ebx
+  int v8; // eax
+  char v10; // [esp+Fh] [ebp-419h]
+  struct sockaddr name; // [esp+10h] [ebp-418h] BYREF
+  int v12; // [esp+24h] [ebp-404h]
+  char buf[1021]; // [esp+28h] [ebp-400h] BYREF
+  __int16 v14; // [esp+425h] [ebp-3h]
+  char v15; // [esp+427h] [ebp-1h]
+
+  memset(buf, 0, sizeof(buf));
+  name.sa_family = 2;
+  v14 = 0;
+  v15 = 0;
+  *(_DWORD *)&name.sa_data[2] = inet_addr(cp);
+  *(_WORD *)name.sa_data = htons(hostshort);
+  v3 = socket(2, 1, 0);
+  v4 = v3;
+  if ( v3 != -1 )
+  {
+    if ( connect(v3, &name, 16) != -1
+      && send(v4, byte_42E544, 137, 0) != -1
+      && recv(v4, buf, 1024, 0) != -1
+      && send(v4, byte_42E5D0, 140, 0) != -1
+      && recv(v4, buf, 1024, 0) != -1 )
+    {
+      v5 = buf[32];
+      byte_42E67C = buf[32];
+      v10 = buf[33];
+      byte_42E67D = buf[33];
+      if ( send(v4, byte_42E65C, 96, 0) != -1 && recv(v4, buf, 1024, 0) != -1 )
+      {
+        byte_42E6D8 = buf[28];
+        byte_42E6D9 = buf[29];
+        byte_42E6DC = v5;
+        byte_42E6DD = v10;
+        byte_42E72C = buf[28];
+        byte_42E72D = buf[29];
+        byte_42E730 = v5;
+        byte_42E731 = v10;
+        if ( send(v4, byte_42E6BC, 82, 0) != -1 && recv(v4, buf, 1024, 0) != -1 && buf[34] == 81 )
+        {
+          v6 = *(_DWORD *)&buf[18];
+          v12 = *(_DWORD *)&buf[22];
+          v7 = sub_406EB0(*(_DWORD *)&buf[18], *(_DWORD *)&buf[22]);
+          v8 = sub_406ED0(v6);
+          sub_406F50(v4, v7, v8);
+        }
+      }
+    }
+    closesocket(v4);
+  }
+  return 0;
+}
