@@ -85,12 +85,12 @@ jmp     short $+2       ; 다음 명령어(sub_408090) 이동
 ### 3.2 서비스 등록 [(sub_407C40)](./Pseudocode/sub_407C40)
 시스템이 재부팅되어도 악성코드가 계속 실행되도록 자신을 서비스로 등록한다.
 
-+ 명령행 구성 : 자신을 실행할 때 `-m security`라는 인자를 붙이도록 설정한다.
++ 자신을 실행할 때 `-m security`라는 인자를 붙이도록 설정한다.
 ```c
   sprintf(Buffer, "%s -m security", FileName);
 ```
-+ 서비스 생성 : `CreateServiceA`를 통해 자신을 **"Microsoft Security Center (2.0) Service"**라는 이름의 서비스로 등록한다.
-+ 즉시 실행 : 등록하자마자 `StartServiceA`를 호출하여 서비스를 즉시 시작한다.
++ `CreateServiceA`를 통해 자신을 **"Microsoft Security Center (2.0) Service"**라는 이름의 서비스로 등록한다.
++ 등록하자마자 `StartServiceA`를 호출하여 서비스를 즉시 시작한다.
 ![sub_407C40](../_Attachments/servicename.png)
 
 ### 3.3 리소스 추출 및 실행 [(sub_407CE0)](./Pseudocode/sub_407CE0)
