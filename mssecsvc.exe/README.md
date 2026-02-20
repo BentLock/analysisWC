@@ -97,6 +97,9 @@ jmp     short $+2       ; 다음 명령어(sub_408090) 이동
 ### 3.3 리소스 추출 및 실행 [(sub_407CE0)](./Pseudocode/sub_407CE0)
 
 자신의 몸체 안에 있는 리소스 섹션에서 암호화된 데이터를 로드하고 이를 C:\WINDOWS\tasksche.exe 경로에 파일로 생성(Drop)하고 실행합니다.
+```c
+sprintf(Buffer, "C:\\%s\\%s", aWindows, aTaskscheExe);
+```
 
 + 동적 API 로딩 : 보안 솔류션의 탐지를 피하기 위해 `GetProcAddress`를 사용하여 `CreateProcessA`, `WriteFile` 등의 함수 주소를 동적으로 가져옵니다.
 + 리소스 추출 : 자신의 리소스 섹션에서 ID 0x727(`tasksche.exe`)을 찾아냅니다.
